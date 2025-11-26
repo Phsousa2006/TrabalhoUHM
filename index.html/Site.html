@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casamento - Lista de Presentes</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* REINICIALIZAÇÃO CSS UNIVERSAL para garantir box-sizing consistente */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* ======================================= */
+        /* 0. PALETA DE CORES E FONTES             */
+        /* ======================================= */
+        :root {
+            --color-primary-light: #a6d4a8; 
+            --color-primary-dark: #8ac08d;  
+            --color-secondary: #f0f0f0;     
+            --color-light: #ffffff;         
+            --color-dark: #333333;          
+            --color-shadow: rgba(0, 0, 0, 0.15); 
+            
+            /* CORES PARA RESERVADO */
+            --color-reserved-bg: #F5A9A9;    
+            --color-reserved-text: #990000;  
+            
+            --font-body: 'Roboto', sans-serif;
+            --font-title: 'Playfair Display', serif; 
+        }
+        
+        /* Tema Escuro */
+        body.dark-theme {
+            background-color: #1a1a1a; 
+            color: #f0f0f0;
+        }
+
+        .dark-theme .app-container {
+            background-color: #2c2c2c;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .dark-theme .header-title {
+            color: #f0f0f0;
+        }
+        
+        .dark-theme .search-input {
+            background-color: #3a3a3a;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+        .dark-theme .search-input::placeholder {
+            color: #aaa;
+        }
+
+        .dark-theme .gift-item:not(.reserved) {
+            background-color: #3a3a3a;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            color: #f0f0f0;
+        }
+        
+        /* Estilos Globais e do Corpo */
+        body {
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-secondary); 
+            padding-bottom: 100px; 
+            color: var(--color-dark);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s; 
+            overflow-x: hidden; /* Fixa o bug da lateral */
+        }
+        
+        /* Classe para aplicar a escala da fonte (apenas para elementos de texto) */
+        .scalable-text {
+            font-size: 1em; /* Valor base (sem escala), será alterado via JS */
+            transition: font-size 0.3s;
+        }
+
+        /* Container Principal */
+        .app-container {
+            width: 100%; /* Ocupa a largura total */
+            background-color: var(--color-light); 
+            padding: 10px; /* Padding interno */
+            box-sizing: border-box; 
+            min-height: 90vh; 
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); 
+            transition: background-color 0.3s;
+
+            /* Centraliza o conteúdo dentro do app-container em telas maiores */
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            padding-left: 10px; 
+            padding-right: 10px; 
+        }
+
+        /* ======================================= */
+        /* 1. CABEÇALHO E BARRA DE PESQUISA        */
+        /* ======================================= */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 700px; /* Limita a largura do header dentro do app-container */
+            width: 100%; 
+            margin: 0; 
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            font-family: var(--font-title); 
+            font-size: 3em; 
+            font-weight: 700;
+            color: var(--color-dark);
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        /* Botões de Ícone */
+        .icon-button {
+            background: var(--color-secondary); 
+            border: none;
+            font-size: 1.5em; 
+            cursor: pointer;
+            padding: 8px; 
+            border-radius: 50%; 
+            color: var(--color-dark);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        .icon-button:hover {
+            color: var(--color-primary-dark);
+            background-color: #e0e0e0;
+            transform: translateY(-1px);
+        }
+        .dark-theme .icon-button {
+            background: #444;
+            color: #ccc;
+        }
+        .dark-theme .icon-button:hover {
+            background-color: #555;
+            color: var(--color-primary-light);
+        }
+
+        /* Barra de Pesquisa */
+        .search-bar {
+            display: flex;
+            max-width: 700px; 
+            width: 100%; 
+            margin: 0; 
+            margin-bottom: 30px; 
+            padding: 0; 
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px; /* Mais arredondado */
+            background-color: var(--color-light);
+            font-size: 1em; 
+            text-align: left;
+            padding-left: 40px; 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23888" class="bi bi-search" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 15px center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--color-primary-dark);
+        }
+
+        /* ======================================= */
+        /* 2. LISTA DE PRESENTES                   */
+        /* ======================================= */
+        .gift-list {
+            max-width: 700px; 
+            width: 100%; 
+            margin: 0; 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px;
+            padding: 0 0 20px 0; 
+        }
+
+        .gift-item {
+            background-color: var(--color-light); 
+            padding: 15px;
+            border-radius: 10px; 
+            box-shadow: 0 8px 15px var(--color-shadow);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid transparent;
+        }
+        
+        .gift-item.hidden {
+            display: none !important;
+        }
+        
+        .gift-item:hover:not(.reserved) { 
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15); 
+            border: 1px solid var(--color-primary-dark);
+        }
+
+        /* Estilo para Presente Reservado (FUNDO DO CARD) */
+        .gift-item.reserved {
+            background-color: #ffe6e6;
+            border-color: var(--color-reserved-bg);
+            box-shadow: 0 8px 15px rgba(245, 169, 169, 0.5); 
+            opacity: 0.7; 
+        }
+
+        .dark-theme .gift-item.reserved {
+            background-color: #4a3838;
+            color: #f0f0f0;
+        }
+
+
+        .gift-title {
+            font-size: 1.2em; 
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+        }
+
+        .gift-emoji {
+            font-size: 3em; 
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        /* Botões de Ação */
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .action-button {
+            padding: 10px;
+            border: none;
+            border-radius: 25px; /* Mais arredondado */
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.95em; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            width: 100%; 
+        }
+
+        .reserve-btn-list { 
+            background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary-dark)); 
+            color: var(--color-dark);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .reserve-btn-list:hover:not(:disabled) {
+            background: linear-gradient(180deg, var(--color-primary-dark), var(--color-primary-light));
+        }
+
+        /* Estilo para Presente Reservado (Botão) */
+        .reserved .reserve-btn-list {
+            background: var(--color-reserved-bg);
+            color: var(--color-reserved-text);
+            cursor: default;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(153, 0, 0, 0.4); 
+        }
+        
+        /* ======================================= */
+        /* 3. MODAIS (GERAIS)                      */
+        /* ======================================= */
+        .modal-overlay {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999; 
+            visibility: hidden; 
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-card {
+            padding: 30px;
+            border-radius: 25px; 
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            transform: scale(0.9);
+            transition: transform 0.3s ease-in-out;
+            background-color: var(--color-dark); 
+            color: var(--color-light);
+        }
+        .modal-overlay.show .modal-card {
+             transform: scale(1);
+        }
+        
+        /* Estilos específicos do Modal de Configuração (Diferente dos demais) */
+        #configCard {
+             background-color: #444; 
+        }
+        
+        /* Elementos Comuns do Modal */
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-back-button {
+            background: none;
+            border: none;
+            font-size: 2em; 
+            color: inherit; 
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-title {
+            font-family: var(--font-title);
+            font-size: 2em; 
+            font-weight: 700;
+            flex-grow: 1;
+        }
+        
+        /* Descrição do Modal de Reserva */
+        .card-description {
+            font-size: 1em; 
+        }
+
+        /* Estilos de input de Reserva/Login/Criação */
+        .card-input-group {
+            margin-bottom: 20px;
+        }
+
+        .card-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px; /* Mais arredondado */
+            background-color: var(--color-light); 
+            color: var(--color-dark);
+            font-size: 1em; 
+            text-align: left; 
+            outline: none;
+            /* REMOVENDO box-shadow INSET AQUI, pois estava gerando a linha interna indesejada no escuro */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+            resize: none;
+        }
+        
+        /* --- AJUSTE VISUAL: Inputs nos modais no tema escuro (Maior Contraste e Limpeza) --- */
+        .dark-theme .modal-card .card-input {
+            background-color: #4f4f4f; 
+            color: #f0f0f0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra externa mais forte */
+            border: 1px solid #555; /* Borda sutil e definida */
+        }
+        .card-input::placeholder {
+            color: #999;
+        }
+
+        /* Botões de Ação Principal (Confirmar, Reservar) */
+        .card-reserve-button, .login-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px; /* Mais arredondado */
+            background: linear-gradient(0deg, var(--color-primary-dark), var(--color-primary-light));
+            color: var(--color-dark);
+            font-size: 1.1em; 
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .card-reserve-button:hover, .login-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Botões Secundários (Criar Conta / Painel Admin na tela de Perfil) */
+        .secondary-action-link {
+            width: 100%;
+            display: block;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--color-primary-light); 
+            background: none;
+            border: none;
+            text-decoration: none;
+            border-radius: 25px; 
+        }
+        .secondary-action-link:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Estilos específicos da tela de Perfil */
+        .profile-icon {
+            text-align: center;
+            font-size: 4em;
+            margin: 10px 0 20px;
+        }
+        .profile-action-list {
+            display: flex;
+            flex-direction: column; 
+            gap: 15px; 
+            margin-top: 20px;
+        }
+
+        .profile-action-list button.profile-action-button { 
+            width: 100%;
+            display: block; 
+            text-align: center; 
+            padding: 15px; 
+            background: linear-gradient(0deg, var(--color-primary-dark), var(--color-primary-light)); 
+            color: var(--color-dark); 
+            border: none;
+            border-radius: 25px; 
+            font-size: 1.1em; 
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .profile-action-list button.profile-action-button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(0deg, var(--color-primary-light), var(--color-primary-dark)); 
+        }
+        .profile-action-list button.profile-action-button span {
+            display: none; 
+        }
+        
+        /* --- Configurações --- */
+        .config-group {
+            margin-bottom: 25px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .config-label-container { 
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1em; 
+            font-weight: 500;
+        }
+        .config-label-container .config-label-text {
+            margin-right: 10px;
+        }
+        /* Estilo do Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+        .switch-container {
+            width: 50px;
+            height: 28px; 
+            background-color: #888;
+            border-radius: 25px; 
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        .switch-container.on {
+            background-color: var(--color-primary-dark);
+        }
+        .switch-handle {
+            width: 24px; 
+            height: 24px; 
+            background-color: var(--color-light);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .switch-container.on .switch-handle {
+            transform: translateX(22px); 
+        }
+
+        .theme-icon {
+            font-size: 1.2em; 
+            margin-right: 5px; 
+        }
+        /* Visibilidade dos Ícones */
+        .theme-icon.light-mode-icon {
+            display: inline; 
+        }
+        .dark-theme .theme-icon.light-mode-icon {
+            display: none; 
+        }
+        .theme-icon.dark-mode-icon {
+            display: none; 
+        }
+        .dark-theme .theme-icon.dark-mode-icon {
+            display: inline; 
+        }
+
+
+        /* Botão Salvar Configuração */
+        #saveConfigButton {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px; 
+            background: linear-gradient(0deg, var(--color-primary-dark), var(--color-primary-light));
+            color: var(--color-dark);
+            font-size: 1.1em; 
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        #saveConfigButton:hover {
+            transform: translateY(-2px);
+        }
+
+        /* --- Estilos do Painel Admin --- */
+        .admin-action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .admin-action-list button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--color-dark);
+            background: var(--color-secondary);
+            transition: background-color 0.2s;
+        }
+        .admin-action-list button:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* --- Estilos da Lista de Convidados (Gestão de Reservas) --- */
+        .admin-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-basis: 48%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--color-primary-light);
+        }
+
+        .choices-list .choice-item {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 0.5fr;
+            gap: 10px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .choices-list .choice-item:last-child {
+            border-bottom: none;
+        }
+        .choice-info span {
+            display: block;
+            font-size: 0.9em;
+        }
+        .choice-action-button {
+            background: none;
+            border: none;
+            color: var(--color-reserved-bg);
+            cursor: pointer;
+            font-size: 1.5em;
+            padding: 5px;
+            transition: opacity 0.2s;
+        }
+        .choice-action-button:hover {
+            opacity: 0.7;
+        }
+        
+        /* --- Estilos da Gestão de Presentes --- */
+        .gift-management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .gift-management-header .total-count {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+        }
+        .gift-management-header .total-count span {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-left: 10px;
+            color: var(--color-primary-light);
+        }
+        
+        /* Botão Adicionar Presente */
+        .add-gift-button {
+            background-color: var(--color-primary-dark);
+            color: var(--color-dark);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .add-gift-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Lista de Itens Gerenciáveis */
+        .management-list .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        .management-list .item-row:last-child {
+            border-bottom: none;
+        }
+        .management-list .delete-btn {
+            background: none;
+            border: none;
+            color: var(--color-reserved-bg);
+            cursor: pointer;
+            font-size: 1.5em;
+            padding: 5px;
+            transition: opacity 0.2s;
+        }
+        .management-list .delete-btn:hover {
+            opacity: 0.7;
+        }
+
+        /* --- AJUSTE VISUAL: Área de Upload de Imagem (Borda e Texto) --- */
+        .image-upload-area {
+            text-align: center;
+            padding: 20px;
+            /* Usando borda tracejada de cor clara com alta opacidade */
+            border: 2px dashed rgba(255, 255, 255, 0.9); 
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            position: relative;
+            background: rgba(0, 0, 0, 0.1); 
+        }
+        .dark-theme .image-upload-area {
+            background: rgba(255, 255, 255, 0.08); 
+        }
+        .image-upload-area .camera-icon {
+            font-size: 3em;
+            margin-bottom: 5px;
+            display: block;
+            color: var(--color-light); 
+        }
+        .image-upload-area p {
+            color: var(--color-light); 
+        }
+        /* --- FIM AJUSTE VISUAL --- */
+        
+        /* Permite rolagem interna no conteúdo do modal */
+        #giftManagementListContainer, 
+        #choicesListContainer {
+            max-height: 250px; 
+            overflow-y: auto;
+            padding-right: 5px; 
+        }
+
+        /* ======================================= */
+        /* 4. MEDIA QUERY PARA RESPONSIVIDADE      */
+        /* ======================================= */
+
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .gift-list {
+                grid-template-columns: repeat(3, 1fr); 
+                max-width: 90%; 
+            }
+        }
+        
+        @media (max-width: 600px) {
+            
+            .header {
+                padding: 15px 0; 
+            }
+            .header-title {
+                font-size: 2.2em;
+            }
+            
+            .gift-list {
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 15px;
+                padding: 0 0 20px 0; 
+                max-width: 100%;
+            }
+            .search-bar {
+                padding: 0; 
+            }
+            .modal-card {
+                width: 90%;
+                padding: 25px;
+            }
+            .icon-button {
+                font-size: 1.3em;
+            }
+            .gift-emoji {
+                font-size: 2.5em; 
+            }
+        }
+    </style>
+</head>
+<body id="pageBody"> 
+
+    <div class="modal-overlay" id="profileCardOverlay" role="dialog" aria-modal="true" aria-labelledby="profileTitle" tabindex="-1">
+        <div class="modal-card" id="profileCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="profileBackButton" aria-label="Voltar para a lista">⬅️</button>
+                <h2 class="modal-title" id="profileTitle">Perfil</h2>
+            </div>
+
+            <div class="profile-icon">👤</div>
+
+            <div class="profile-action-list">
+                <button class="profile-action-button scalable-text" id="openLoginFromProfile">
+                    Login
+                </button>
+                <button class="profile-action-button scalable-text" id="openAdminPanelFromProfile">
+                    Painel admin
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="loginCardOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle" tabindex="-1">
+        <div class="modal-card" id="loginCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="loginBackButton" aria-label="Voltar para o perfil">⬅️</button>
+                <h2 class="modal-title" id="loginTitle">Login</h2>
+            </div>
+            
+            <div class="profile-icon">👤</div>
+
+            <form id="loginForm"> 
+                <div class="card-input-group">
+                    <input type="text" id="loginInput" class="card-input scalable-text" placeholder="Login" required aria-label="Login">
+                </div>
+                <div class="card-input-group">
+                    <input type="password" id="passwordInput" class="card-input scalable-text" placeholder="Senha" required aria-label="Senha">
+                </div>
+
+                <button type="submit" class="login-button scalable-text">Confirmar</button>
+            </form>
+            
+            <button class="secondary-action-link scalable-text" id="openCreateAccountFromLogin">Criar conta</button>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="createAccountCardOverlay" role="dialog" aria-modal="true" aria-labelledby="createAccountTitle" tabindex="-1">
+        <div class="modal-card" id="createAccountCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="createAccountBackButton" aria-label="Voltar para o login">⬅️</button>
+                <h2 class="modal-title" id="createAccountTitle">Criar Conta</h2>
+            </div>
+            
+            <div class="profile-icon">👤</div>
+
+            <form id="createAccountForm"> 
+                <div class="card-input-group">
+                    <input type="email" id="emailCreateInput" class="card-input scalable-text" placeholder="E-Mail" required aria-label="E-Mail">
+                </div>
+                <div class="card-input-group">
+                    <input type="text" id="loginCreateInput" class="card-input scalable-text" placeholder="Login" required aria-label="Login">
+                </div>
+                <div class="card-input-group">
+                    <input type="password" id="passwordCreateInput" class="card-input scalable-text" placeholder="Senha" required aria-label="Senha">
+                </div>
+                <div class="card-input-group">
+                    <input type="password" id="confirmPasswordCreateInput" class="card-input scalable-text" placeholder="Confirmar Senha" required aria-label="Confirmar Senha">
+                </div>
+
+                <button type="submit" class="login-button scalable-text">Confirmar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="adminPanelCardOverlay" role="dialog" aria-modal="true" aria-labelledby="adminTitle" tabindex="-1">
+        <div class="modal-card" id="adminPanelCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="adminPanelBackButton" aria-label="Voltar para o perfil">⬅️</button>
+                <h2 class="modal-title" id="adminTitle">Painel admin</h2>
+            </div>
+            
+            <div class="admin-action-list">
+                <button class="scalable-text" id="openGuestSelectionButton">Escolha dos convidados</button>
+                <button class="scalable-text" id="openGiftManagementButton">Gestão de presentes</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="guestSelectionCardOverlay" role="dialog" aria-modal="true" aria-labelledby="guestSelectionTitle" tabindex="-1">
+        <div class="modal-card" id="guestSelectionCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="guestSelectionBackButton" aria-label="Voltar para o painel admin">⬅️</button>
+                <h2 class="modal-title" id="guestSelectionTitle">Escolha dos convidados</h2>
+            </div>
+
+            <div class="admin-summary scalable-text">
+                <div class="summary-item">
+                    Presentes disponíveis
+                    <span class="summary-value" id="availableGiftsCount">0</span>
+                </div>
+                <div class="summary-item">
+                    Presentes escolhidos
+                    <span class="summary-value" id="reservedGiftsCount">0</span>
+                </div>
+            </div>
+            
+            <h3 class="scalable-text" style="margin-top: 20px;">Escolhas</h3>
+            <div class="choices-list" id="choicesListContainer">
+                </div>
+
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="giftManagementCardOverlay" role="dialog" aria-modal="true" aria-labelledby="giftManagementTitle" tabindex="-1">
+        <div class="modal-card" id="giftManagementCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="giftManagementBackButton" aria-label="Voltar para o painel admin">⬅️</button>
+                <h2 class="modal-title" id="giftManagementTitle">Gestão de presentes</h2>
+            </div>
+
+            <div class="gift-management-header scalable-text">
+                <div class="total-count">
+                    Quantidade de presentes
+                    <span id="totalGiftsCount">0</span>
+                </div>
+                <button class="add-gift-button" id="openAddGiftButton">+</button>
+            </div>
+            
+            <div class="management-list" id="giftManagementListContainer">
+                </div>
+
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="addGiftCardOverlay" role="dialog" aria-modal="true" aria-labelledby="addGiftTitle" tabindex="-1">
+        <div class="modal-card" id="addGiftCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="addGiftBackButton" aria-label="Voltar para Gestão de Presentes">⬅️</button>
+                <h2 class="modal-title" id="addGiftTitle">Adicionar presente</h2>
+            </div>
+
+            <form id="addGiftForm">
+                <label for="giftImageInput" class="image-upload-area scalable-text" id="imageUploadArea">
+                    <span class="camera-icon">📷<span style="font-size: 0.5em; position: absolute; margin-left: -5px; color: var(--color-primary-light);">+</span></span>
+                    <p style="margin: 0; font-size: 0.9em;">Adicionar foto (Simulação)</p>
+                    <input type="file" id="giftImageInput" accept="image/*" style="display: none;">
+                </label>
+                
+                <div class="card-input-group">
+                    <input type="text" id="newGiftNameInput" class="card-input scalable-text" placeholder="Nome" required aria-label="Nome do presente">
+                </div>
+                
+                <button type="submit" class="login-button scalable-text" style="background: var(--color-primary-dark);">Adicionar</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="configCardOverlay" role="dialog" aria-modal="true" aria-labelledby="configTitle" tabindex="-1">
+        <div class="modal-card" id="configCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="configBackButton" aria-label="Voltar para a lista">⬅️</button>
+                <h2 class="modal-title" id="configTitle">Configuração</h2>
+            </div>
+
+            <div class="config-group">
+                <label class="config-label scalable-text" for="fontSizeSlider">Fonte</label>
+                <div class="font-range-container">
+                    <span class="scalable-text">1.0</span>
+                    <input type="range" id="fontSizeSlider" min="1.0" max="1.5" step="0.1">
+                    <span class="scalable-text">1.5</span>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <div class="toggle-switch" id="darkThemeSwitch" tabindex="0" role="switch" aria-checked="false">
+                    <div class="config-label-container">
+                        <span class="theme-icon light-mode-icon" id="lightModeIcon">☀️</span>
+                        <span class="theme-icon dark-mode-icon" id="darkModeIcon">🌙</span>
+                        <label class="config-label-text scalable-text" id="themeLabelText" for="darkThemeSwitch">Tema Escuro</label>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch-handle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="saveConfigButton" class="scalable-text">Salvar</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reservationCardOverlay" role="dialog" aria-modal="true" aria-labelledby="cardGiftTitle" tabindex="-1">
+        <div class="modal-card" id="reservationCard">
+            <div class="modal-header">
+                <button class="modal-back-button" id="cardBackButton" aria-label="Voltar para a lista">⬅️</button>
+                <h2 class="modal-title" id="cardGiftTitle"></h2>
+            </div>
+            <p class="card-description scalable-text" id="cardGiftDescription">Confirme seus dados para reservar este item e garantir que o casal não o receba em duplicidade.</p>
+
+            <form id="reservationForm"> 
+                <div class="card-input-group">
+                    <input type="text" id="fullNameInput" class="card-input scalable-text" placeholder="Nome completo" required aria-label="Nome completo">
+                </div>
+                <div class="card-input-group">
+                    <input type="tel" id="contactNumberInput" class="card-input scalable-text" placeholder="Número para Contato (WhatsApp)" required pattern="[0-9\s\(\)\-]{8,}" title="Apenas números, espaços, parênteses ou traços são permitidos." aria-label="Número para Contato (WhatsApp)">
+                </div>
+
+                <button type="submit" class="card-reserve-button scalable-text" id="confirmReservationButton">Reservar Presente</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="app-container">
+        
+        <div class="header">
+            <button class="icon-button" aria-label="Perfil" id="openProfileButton">👤</button> 
+            <h1 class="header-title">Casamento</h1>
+            <button class="icon-button" aria-label="Configurações" id="openConfigButton">⚙️</button> 
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input scalable-text" placeholder="Pesquisar presentes" aria-label="Pesquisar presentes">
+        </div>
+
+        <div class="gift-list" id="giftList">
+            </div>
+        
+        <p id="noGiftsMessage" style="text-align: center; color: var(--color-dark); opacity: 0.6; margin-top: 50px; display: none;">Nenhum presente disponível no momento.</p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- VARIÁVEIS DE ADMIN E CONSTANTES ---
+            const TOTAL_GIFTS_INITIAL = 20; 
+            let isAuthenticated = null; 
+            
+            // --- VARIÁVEIS DE CORREÇÃO DE ESCOPO ---
+            const scalableElements = document.querySelectorAll('.scalable-text'); 
+
+            // --- ELEMENTOS PRINCIPAIS ---
+            const pageBody = document.getElementById('pageBody');
+            const giftList = document.getElementById('giftList');
+            const searchInput = document.getElementById('searchInput');
+            const noGiftsMessage = document.getElementById('noGiftsMessage');
+            
+            // --- VARIÁVEIS DE RESERVA ---
+            const reservationCardOverlay = document.getElementById('reservationCardOverlay');
+            const cardBackButton = document.getElementById('cardBackButton');
+            const cardGiftTitle = document.getElementById('cardGiftTitle');
+            const fullNameInput = document.getElementById('fullNameInput');
+            const contactNumberInput = document.getElementById('contactNumberInput');
+            const reservationForm = document.getElementById('reservationForm'); 
+            let currentGiftItem = null; 
+
+            // --- VARIÁVEIS DE CONFIGURAÇÃO ---
+            const configCardOverlay = document.getElementById('configCardOverlay');
+            const openConfigButton = document.getElementById('openConfigButton');
+            const configBackButton = document.getElementById('configBackButton');
+            const fontSizeSlider = document.getElementById('fontSizeSlider');
+            const darkThemeSwitch = document.getElementById('darkThemeSwitch');
+            const saveConfigButton = document.getElementById('saveConfigButton');
+            const themeLabelText = document.getElementById('themeLabelText');
+
+            // --- VARIÁVEIS DE PERFIL/LOGIN ---
+            const openProfileButton = document.getElementById('openProfileButton');
+            const profileCardOverlay = document.getElementById('profileCardOverlay');
+            const profileBackButton = document.getElementById('profileBackButton');
+            const openLoginFromProfile = document.getElementById('openLoginFromProfile'); 
+            const openAdminPanelFromProfile = document.getElementById('openAdminPanelFromProfile');
+            
+            const loginCardOverlay = document.getElementById('loginCardOverlay');
+            const loginBackButton = document.getElementById('loginBackButton');
+            const openCreateAccountFromLogin = document.getElementById('openCreateAccountFromLogin');
+            const loginForm = document.getElementById('loginForm');
+            const loginInput = document.getElementById('loginInput');
+            const passwordInput = document.getElementById('passwordInput');
+            
+            const createAccountCardOverlay = document.getElementById('createAccountCardOverlay');
+            const createAccountBackButton = document.getElementById('createAccountBackButton');
+            const createAccountForm = document.getElementById('createAccountForm');
+            const loginCreateInput = document.getElementById('loginCreateInput');
+            const passwordCreateInput = document.getElementById('passwordCreateInput');
+            
+            // --- VARIÁVEIS ADMIN ---
+            const adminPanelCardOverlay = document.getElementById('adminPanelCardOverlay');
+            const adminPanelBackButton = document.getElementById('adminPanelBackButton');
+            const openGuestSelectionButton = document.getElementById('openGuestSelectionButton');
+            const openGiftManagementButton = document.getElementById('openGiftManagementButton');
+            
+            const guestSelectionCardOverlay = document.getElementById('guestSelectionCardOverlay');
+            const guestSelectionBackButton = document.getElementById('guestSelectionBackButton');
+            const availableGiftsCount = document.getElementById('availableGiftsCount');
+            const reservedGiftsCount = document.getElementById('reservedGiftsCount');
+            const choicesListContainer = document.getElementById('choicesListContainer');
+
+            // --- VARIÁVEIS ADMIN GESTÃO ---
+            const giftManagementCardOverlay = document.getElementById('giftManagementCardOverlay');
+            const giftManagementBackButton = document.getElementById('giftManagementBackButton');
+            const totalGiftsCount = document.getElementById('totalGiftsCount');
+            const openAddGiftButton = document.getElementById('openAddGiftButton');
+            const giftManagementListContainer = document.getElementById('giftManagementListContainer');
+            
+            const addGiftCardOverlay = document.getElementById('addGiftCardOverlay');
+            const addGiftBackButton = document.getElementById('addGiftBackButton');
+            const addGiftForm = document.getElementById('addGiftForm');
+            const newGiftNameInput = document.getElementById('newGiftNameInput');
+            const giftImageInput = document.getElementById('giftImageInput');
+
+            
+            // --- CHAVES DE ARMAZENAMENTO ---
+            const RESERVATION_STORAGE_KEY = 'weddingGiftListReservations';
+            const CONFIG_STORAGE_KEY = 'weddingAppSettings';
+            const USER_STORAGE_KEY = 'weddingAppUsers'; 
+            const GIFT_INVENTORY_KEY = 'weddingGiftInventory';
+            const MAX_FONT_SIZE = 1.5;
+            
+            // =======================================
+            // PERSISTÊNCIA E INICIALIZAÇÃO
+            // =======================================
+            
+            const loadReservations = () => {
+                try {
+                    return JSON.parse(localStorage.getItem(RESERVATION_STORAGE_KEY)) || {};
+                } catch (e) {
+                    console.error("Erro ao carregar reservas:", e);
+                    return {};
+                }
+            };
+            let reservedItems = loadReservations();
+
+            const saveReservations = () => {
+                localStorage.setItem(RESERVATION_STORAGE_KEY, JSON.stringify(reservedItems));
+            };
+            
+            const getGiftNameById = (id) => {
+                 const gift = giftInventory[id];
+                 return gift ? gift.name : 'Presente Desconhecido';
+            }
+
+            // DADOS INICIAIS DO INVENTÁRIO (Migrado do HTML)
+            const initialGifts = [
+                { id: 1, name: 'Panela', emoji: '🍲' }, { id: 2, name: 'Talheres', emoji: '🍴' },
+                { id: 3, name: 'Copos', emoji: '🥛' }, { id: 4, name: 'Sofá', emoji: '🛋️' },
+                { id: 5, name: 'Chuveiro', emoji: '🚿' }, { id: 6, name: 'Cama', emoji: '🛏️' },
+                { id: 7, name: 'Geladeira', emoji: '🧊' }, { id: 8, name: 'Máquina de Lavar', emoji: '🧺' },
+                { id: 9, name: 'Aspirador', emoji: '🧹' }, { id: 10, name: 'Liquidificador', emoji: '🥤' },
+                { id: 11, name: 'Toalhas', emoji: '🛁' }, { id: 12, name: 'Mesa de Jantar', emoji: '🍽️' },
+                { id: 13, name: 'Cortina', emoji: '🖼️' }, { id: 14, name: 'Luminária', emoji: '💡' },
+                { id: 15, name: 'Ferro de Passar', emoji: '👚' }, { id: 16, name: 'Air Fryer', emoji: '🍟' },
+                { id: 17, name: 'Cafeteira', emoji: '☕' }, { id: 18, name: 'Vinho', emoji: '🍷' },
+                { id: 19, name: 'Caixa de Som', emoji: '🔊' }, { id: 20, name: 'Microondas', emoji: '♨️' }
+            ];
+
+            const loadGiftInventory = () => { 
+                try {
+                    let inventory = JSON.parse(localStorage.getItem(GIFT_INVENTORY_KEY));
+                    
+                    // Inicializa o inventário se não existir ou estiver vazio
+                    if (!inventory || Object.keys(inventory).length === 0) {
+                        inventory = {};
+                        initialGifts.forEach(gift => { inventory[gift.id] = gift; });
+                        localStorage.setItem(GIFT_INVENTORY_KEY, JSON.stringify(inventory));
+                    }
+                    return inventory;
+                } catch (e) {
+                    // Em caso de erro de parsing, retorna o inventário inicial
+                    let inventory = {};
+                    initialGifts.forEach(gift => { inventory[gift.id] = gift; });
+                    return inventory;
+                }
+            };
+            let giftInventory = loadGiftInventory();
+
+            const saveGiftInventory = (inventory) => { 
+                localStorage.setItem(GIFT_INVENTORY_KEY, JSON.stringify(inventory));
+                giftInventory = inventory; 
+                renderGiftList(); // Atualiza a lista principal após salvar
+            };
+
+            const loadUsers = () => { 
+                try {
+                    let users = JSON.parse(localStorage.getItem(USER_STORAGE_KEY));
+                    
+                    // Adiciona um usuário admin padrão se não houver usuários (ou se o localStorage estiver corrompido)
+                    if (!users || Object.keys(users).length === 0) {
+                         users = {
+                            'admin': { login: 'admin', password: 'admin', isAdmin: true, email: 'admin@example.com' }
+                         };
+                         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
+                    }
+                    return users;
+                } catch (e) {
+                    console.error("Erro ao carregar usuários:", e);
+                    // Garante que o admin exista em caso de erro de parsing
+                    return {
+                        'admin': { login: 'admin', password: 'admin', isAdmin: true, email: 'admin@example.com' }
+                    };
+                }
+            };
+            let registeredUsers = loadUsers();
+
+            const saveUsers = () => { 
+                localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(registeredUsers));
+            };
+
+            const loadConfig = () => {
+                try {
+                    const defaultConfig = { fontSize: 1.0, isDark: false };
+                    const savedConfig = JSON.parse(localStorage.getItem(CONFIG_STORAGE_KEY)) || {};
+                    let config = { ...defaultConfig, ...savedConfig };
+                    
+                    if (config.fontSize > MAX_FONT_SIZE) {
+                        config.fontSize = MAX_FONT_SIZE;
+                    }
+
+                    return config;
+                } catch (e) {
+                    console.error("Erro ao carregar configurações:", e);
+                    return { fontSize: 1.0, isDark: false };
+                }
+            };
+            let currentConfig = loadConfig();
+
+            const saveConfig = () => {
+                localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(currentConfig));
+            };
+            
+            // =======================================
+            // RENDERIZAÇÃO DA LISTA PRINCIPAL
+            // =======================================
+            
+            const renderGiftList = () => {
+                const gifts = Object.values(giftInventory);
+                if (gifts.length === 0) {
+                    giftList.innerHTML = '';
+                    noGiftsMessage.style.display = 'block';
+                    return;
+                }
+                
+                noGiftsMessage.style.display = 'none';
+
+                let htmlContent = gifts.map(gift => {
+                    // Verifica se a reserva existe E se o presente existe no inventário (para evitar bugs de exclusão)
+                    const isReserved = reservedItems[gift.id] && giftInventory[gift.id] ? 'true' : 'false';
+                    const reservedClass = isReserved === 'true' ? ' reserved' : '';
+                    const buttonText = isReserved === 'true' ? 'Reservado' : 'reservar';
+                    const disabledAttr = isReserved === 'true' ? 'disabled' : '';
+                    
+                    return `
+                        <div class="gift-item${reservedClass}" data-id="${gift.id}" data-reserved="${isReserved}"> 
+                            <div class="gift-title scalable-text">${gift.name}</div>
+                            <div class="gift-emoji">${gift.emoji || '🎁'}</div>
+                            <div class="actions">
+                                <button class="action-button reserve-btn-list scalable-text" ${disabledAttr}>${buttonText}</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                giftList.innerHTML = htmlContent;
+
+                // Re-obter todos os itens para aplicar listeners e aparência
+                const newGiftItems = giftList.querySelectorAll('.gift-item');
+                newGiftItems.forEach(item => updateItemAppearance(item)); 
+            };
+
+
+            // =======================================
+            // FUNÇÕES DE UI E ESTADO
+            // =======================================
+
+            const updateThemeUI = (isDark) => {
+                const switchContainer = darkThemeSwitch.querySelector('.switch-container');
+                if (isDark) {
+                    pageBody.classList.add('dark-theme');
+                    switchContainer.classList.add('on');
+                    darkThemeSwitch.setAttribute('aria-checked', 'true');
+                    themeLabelText.textContent = 'Tema Escuro'; 
+                } else {
+                    pageBody.classList.remove('dark-theme');
+                    switchContainer.classList.remove('on');
+                    darkThemeSwitch.setAttribute('aria-checked', 'false');
+                    themeLabelText.textContent = 'Tema Claro';
+                }
+            }
+
+            const applyConfig = () => {
+                const newSize = `${Math.min(currentConfig.fontSize, MAX_FONT_SIZE)}em`;
+                
+                scalableElements.forEach(el => {
+                    el.style.fontSize = newSize;
+                });
+                
+                updateThemeUI(currentConfig.isDark);
+            };
+
+            const updateItemAppearance = (item) => {
+                const isReserved = item.dataset.reserved === 'true';
+                const reserveButton = item.querySelector('.reserve-btn-list');
+
+                if (isReserved) {
+                    item.classList.add('reserved');
+                    reserveButton.textContent = 'Reservado'; 
+                    reserveButton.disabled = true; 
+                } else {
+                    item.classList.remove('reserved');
+                    reserveButton.textContent = 'reservar'; 
+                    reserveButton.disabled = false; 
+                }
+            };
+            
+            
+            // INICIALIZAÇÃO: Aplica configurações e reservas ao carregar
+            applyConfig();
+            renderGiftList(); // Chama a função de renderização no início
+            
+            if (fontSizeSlider) {
+                fontSizeSlider.value = Math.min(currentConfig.fontSize, MAX_FONT_SIZE);
+            }
+
+
+            // =======================================
+            // FUNÇÕES GERAIS DE MODAL 
+            // =======================================
+
+            const openModal = (overlay) => {
+                if (!overlay) return;
+                overlay.classList.add('show');
+                document.body.style.overflow = 'hidden'; 
+            };
+
+            const closeModal = (overlay) => {
+                if (!overlay) return;
+                overlay.classList.remove('show');
+                document.body.style.overflow = ''; 
+            };
+
+            // =======================================
+            // ADMIN: GESTÃO DE RESERVAS (RENDERIZAÇÃO)
+            // =======================================
+
+            const renderGuestSelections = () => {
+                const reservations = loadReservations();
+                const totalGifts = Object.keys(giftInventory).length;
+                
+                // Filtra apenas as reservas que possuem um presente correspondente no inventário
+                const validReservedItems = Object.keys(reservations)
+                    .filter(id => reservations[id].reserved && giftInventory[id]); 
+                    
+                const reservedCount = validReservedItems.length;
+                const availableCount = totalGifts - reservedCount;
+
+                availableGiftsCount.textContent = availableCount;
+                reservedGiftsCount.textContent = reservedCount;
+
+                let htmlContent = '';
+                
+                const reservedArray = validReservedItems
+                    .map(id => ({
+                        id: id,
+                        name: reservations[id].name,
+                        contact: reservations[id].contact,
+                        gift: getGiftNameById(id)
+                    }));
+                
+                if (reservedArray.length === 0) {
+                    choicesListContainer.innerHTML = '<p class="scalable-text" style="text-align: center; opacity: 0.7;">Nenhum presente foi reservado ainda.</p>';
+                    return;
+                }
+
+                reservedArray.forEach(reservation => {
+                    htmlContent += `
+                        <div class="choice-item scalable-text" data-reservation-id="${reservation.id}">
+                            <div class="choice-info">
+                                <span>${reservation.name}</span>
+                                <span style="opacity: 0.6; font-size: 0.8em;">${reservation.contact}</span>
+                            </div>
+                            <div>${reservation.gift}</div>
+                            <button class="choice-action-button" aria-label="Deletar escolha" data-delete-id="${reservation.id}">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+                });
+
+                choicesListContainer.innerHTML = htmlContent;
+
+                // Adiciona listeners para exclusão
+                choicesListContainer.querySelectorAll('.choice-action-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const deleteId = e.currentTarget.dataset.deleteId;
+                        if (confirm(`Tem certeza que deseja excluir a reserva do presente: ${getGiftNameById(deleteId)} (ID ${deleteId})?`)) {
+                            deleteReservation(deleteId);
+                        }
+                    });
+                });
+            };
+
+            const deleteReservation = (itemId) => {
+                delete reservedItems[itemId];
+                saveReservations(); 
+                
+                const item = document.querySelector(`.gift-item[data-id="${itemId}"]`);
+                if (item) {
+                    item.dataset.reserved = 'false';
+                    updateItemAppearance(item); 
+                }
+                
+                renderGiftList(); // Atualiza a lista principal
+                renderGuestSelections(); // Re-renderiza a lista de convidados
+
+                alert(`Reserva do presente ID ${itemId} excluída.`);
+            };
+
+            // =======================================
+            // ADMIN: GESTÃO DE PRESENTES (RENDERIZAÇÃO)
+            // =======================================
+
+            const renderGiftManagementList = () => {
+                const gifts = Object.values(giftInventory);
+                totalGiftsCount.textContent = gifts.length;
+
+                let htmlContent = gifts.map(gift => {
+                    const isReserved = reservedItems[gift.id] ? ' (Reservado)' : '';
+                    return `
+                        <div class="item-row scalable-text">
+                            <span>${gift.name} (${gift.emoji || '🎁'})${isReserved}</span>
+                            <button class="delete-btn" data-gift-id="${gift.id}">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                giftManagementListContainer.innerHTML = htmlContent;
+
+                // Adiciona listeners para exclusão de presente
+                giftManagementListContainer.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const giftId = parseInt(e.currentTarget.dataset.giftId); 
+                        if (confirm(`Tem certeza que deseja excluir o presente: ${giftInventory[giftId].name}? Isso também liberará qualquer reserva associada.`)) {
+                            deleteGift(giftId);
+                        }
+                    });
+                });
+            };
+            
+            const deleteGift = (id) => {
+                // 1. Remove do inventário
+                let newInventory = { ...giftInventory };
+                delete newInventory[id];
+                saveGiftInventory(newInventory); 
+
+                // 2. Remove a reserva associada (se existir)
+                if (reservedItems[id]) {
+                    delete reservedItems[id];
+                    saveReservations();
+                }
+
+                renderGiftManagementList(); 
+                alert('Presente excluído com sucesso.');
+            };
+            
+            // =======================================
+            // LÓGICA DE NAVEGAÇÃO ENTRE MODAIS (PERFIL/LOGIN/ADMIN)
+            // =======================================
+
+            const openProfileModal = () => openModal(profileCardOverlay);
+            const openLoginModal = () => openModal(loginCardOverlay);
+            const openCreateAccountModal = () => openModal(createAccountCardOverlay);
+            const openAdminPanelModal = () => openModal(adminPanelCardOverlay);
+            
+            // Função para abrir a Gestão de Convidados
+            const openGuestSelectionModal = () => {
+                closeModal(adminPanelCardOverlay);
+                renderGuestSelections(); 
+                openModal(guestSelectionCardOverlay);
+            }
+
+            // Função para abrir a Gestão de Presentes
+            const openGiftManagementModal = () => {
+                closeModal(adminPanelCardOverlay);
+                renderGiftManagementList(); 
+                openModal(giftManagementCardOverlay);
+            }
+            
+            // Função para abrir Adicionar Presente
+            const openAddGiftModal = () => {
+                addGiftForm.reset();
+                closeModal(giftManagementCardOverlay);
+                openModal(addGiftCardOverlay);
+            }
+            
+            // --- Fluxo de Abertura Inicial ---
+            if (openProfileButton) {
+                openProfileButton.addEventListener('click', openProfileModal);
+            }
+            
+            // --- Navegação Perfil -> Login ---
+            if (openLoginFromProfile) {
+                openLoginFromProfile.addEventListener('click', () => {
+                    loginInput.value = '';
+                    passwordInput.value = '';
+                    closeModal(profileCardOverlay);
+                    openLoginModal();
+                });
+            }
+
+            // --- Navegação Login -> Criar Conta ---
+            if (openCreateAccountFromLogin) {
+                openCreateAccountFromLogin.addEventListener('click', () => {
+                    closeModal(loginCardOverlay);
+                    openCreateAccountModal();
+                });
+            }
+
+            // --- Navegação Perfil -> Admin Panel (GATE DE LOGIN) ---
+            if (openAdminPanelFromProfile) {
+                openAdminPanelFromProfile.addEventListener('click', () => {
+                    if (isAuthenticated && isAuthenticated.isAdmin) {
+                        closeModal(profileCardOverlay);
+                        openAdminPanelModal();
+                    } else {
+                        // Se não estiver logado, direciona para o login
+                        if (!isAuthenticated) {
+                            alert('Acesso negado. Por favor, faça login.');
+                            closeModal(profileCardOverlay);
+                            openLoginModal();
+                        } else {
+                            // Se estiver logado mas não for admin
+                             alert('Acesso negado. Apenas administradores podem acessar este painel.');
+                        }
+                    }
+                });
+            }
+
+            // --- Navegação Admin Panel -> Seleção de Convidados ---
+            if (openGuestSelectionButton) {
+                openGuestSelectionButton.addEventListener('click', openGuestSelectionModal);
+            }
+
+            // --- Navegação Admin Panel -> Gestão de Presentes ---
+            if (openGiftManagementButton) {
+                openGiftManagementButton.addEventListener('click', openGiftManagementModal);
+            }
+            
+            // --- Navegação Gestão de Presentes -> Adicionar Presente ---
+            if (openAddGiftButton) {
+                openAddGiftButton.addEventListener('click', openAddGiftModal);
+            }
+
+            // --- Botões de Voltar ---
+            if (profileBackButton) {
+                profileBackButton.addEventListener('click', () => closeModal(profileCardOverlay));
+            }
+            if (loginBackButton) {
+                loginBackButton.addEventListener('click', () => {
+                    closeModal(loginCardOverlay);
+                    openProfileModal(); 
+                });
+            }
+            if (createAccountBackButton) {
+                createAccountBackButton.addEventListener('click', () => {
+                    closeModal(createAccountCardOverlay);
+                    openLoginModal(); 
+                });
+            }
+            if (adminPanelBackButton) {
+                adminPanelBackButton.addEventListener('click', () => {
+                    closeModal(adminPanelCardOverlay);
+                    openProfileModal(); 
+                });
+            }
+            // Retorna para o Painel Admin (Correção de navegação)
+            if (guestSelectionBackButton) {
+                guestSelectionBackButton.addEventListener('click', () => {
+                    closeModal(guestSelectionCardOverlay);
+                    openAdminPanelModal(); 
+                });
+            }
+            if (giftManagementBackButton) {
+                giftManagementBackButton.addEventListener('click', () => {
+                    closeModal(giftManagementCardOverlay);
+                    openAdminPanelModal(); 
+                });
+            }
+            if (addGiftBackButton) {
+                addGiftBackButton.addEventListener('click', () => {
+                    closeModal(addGiftCardOverlay);
+                    openGiftManagementModal(); 
+                });
+            }
+
+
+            // =======================================
+            // LÓGICA DE AUTENTICAÇÃO
+            // =======================================
+
+            // --- Submissão do Login (Autenticação Dinâmica) ---
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const userLogin = loginInput.value.trim();
+                    const userPass = passwordInput.value.trim();
+                    
+                    const user = registeredUsers[userLogin];
+
+                    if (user && user.password === userPass) {
+                        isAuthenticated = user; 
+                        alert(`Login bem-sucedido! ${user.isAdmin ? '(Admin)' : ''}`);
+                        closeModal(loginCardOverlay);
+                        
+                        // Direciona para o Painel Admin se for o caso
+                        if (isAuthenticated.isAdmin) {
+                            openAdminPanelModal();
+                        } else {
+                            // Se não for admin, volta para o perfil/lista
+                            closeModal(loginCardOverlay);
+                            openProfileModal();
+                        }
+
+                    } else {
+                        isAuthenticated = null;
+                        alert('Login ou senha incorretos.');
+                    }
+                });
+            }
+
+            // --- Submissão do Criar Conta (Criação de Admin Dinâmica) ---
+            if (createAccountForm) {
+                createAccountForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const newLogin = loginCreateInput.value.trim();
+                    const newPassword = passwordCreateInput.value;
+                    const confirmPassword = document.getElementById('confirmPasswordCreateInput').value;
+                    
+                    if (newPassword !== confirmPassword) {
+                        alert('As senhas não coincidem!');
+                        return;
+                    }
+
+                    if (registeredUsers[newLogin]) {
+                        alert('Este Login já está em uso. Tente outro.');
+                        return;
+                    }
+                    
+                    const newUser = {
+                        login: newLogin,
+                        password: newPassword,
+                        // Novo usuário NÃO é admin, pois o admin padrão já foi criado no loadUsers.
+                        isAdmin: false, 
+                        email: document.getElementById('emailCreateInput').value.trim()
+                    };
+
+                    registeredUsers[newLogin] = newUser;
+                    saveUsers(); 
+
+                    alert(`Conta criada com sucesso! Agora você pode logar.`);
+                    closeModal(createAccountCardOverlay);
+                    
+                    loginInput.value = newLogin;
+                    openLoginModal();
+                });
+            }
+
+
+            // =======================================
+            // LÓGICA DE GESTÃO DE PRESENTE (CRUD)
+            // =======================================
+            
+            // Helper para gerar o próximo ID sequencial
+            const getNextGiftId = () => {
+                const ids = Object.keys(giftInventory).map(id => parseInt(id)).sort((a, b) => b - a);
+                return (ids.length > 0 ? ids[0] : 0) + 1;
+            };
+
+            // Adicionar Presente
+            if (addGiftForm) {
+                addGiftForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const name = newGiftNameInput.value.trim();
+                    
+                    const emojis = ['🎈', '🖼️', '🛋️', '💡', '🧺', '🎁', '🎀', '🧦', '🔪', '📺'];
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+                    if (name) {
+                        const newId = getNextGiftId();
+                        const newGift = {
+                            id: newId,
+                            name: name,
+                            emoji: randomEmoji,
+                            imagePath: giftImageInput.files[0] ? `simulated/${newId}` : null 
+                        };
+
+                        let newInventory = { ...giftInventory, [newId]: newGift };
+                        saveGiftInventory(newInventory);
+                        
+                        alert(`Presente "${name}" adicionado com sucesso!`);
+                        
+                        closeModal(addGiftCardOverlay);
+                        openGiftManagementModal();
+                    } else {
+                        alert('O nome do presente é obrigatório.');
+                    }
+                });
+            }
+            
+            // =======================================
+            // LISTENERS GERAIS (RESTANTE)
+            // =======================================
+
+            // Fechar ao clicar fora (no overlay)
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        if (overlay.id === 'configCardOverlay') {
+                             applyConfig(); 
+                        }
+                        closeModal(overlay);
+                    }
+                });
+            });
+
+            // Fechar com a tecla ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (document.querySelector('.modal-overlay.show')) {
+                        const currentOverlay = document.querySelector('.modal-overlay.show');
+                        if (currentOverlay.id === 'configCardOverlay') applyConfig(); 
+                        closeModal(currentOverlay);
+                    }
+                }
+            });
+
+
+            // --- Lógica do Modal de Configuração ---
+            if (openConfigButton) {
+                openConfigButton.addEventListener('click', () => {
+                    fontSizeSlider.value = Math.min(currentConfig.fontSize, MAX_FONT_SIZE); 
+                    updateThemeUI(currentConfig.isDark); 
+                    applyConfig(); 
+                    openModal(configCardOverlay);
+                });
+            }
+
+            if (configBackButton) {
+                configBackButton.addEventListener('click', () => {
+                    applyConfig(); 
+                    closeModal(configCardOverlay);
+                });
+            }
+
+            if (fontSizeSlider) {
+                fontSizeSlider.addEventListener('input', (e) => {
+                    const previewSize = `${e.target.value}em`;
+                    scalableElements.forEach(el => {
+                        el.style.fontSize = previewSize; 
+                    });
+                });
+            }
+            
+            if (darkThemeSwitch) {
+                darkThemeSwitch.addEventListener('click', () => {
+                    const isCurrentlyDark = pageBody.classList.contains('dark-theme'); 
+                    const willBeDark = !isCurrentlyDark;
+                    updateThemeUI(willBeDark); 
+                });
+            }
+
+            if (saveConfigButton) {
+                saveConfigButton.addEventListener('click', () => {
+                    currentConfig.fontSize = parseFloat(fontSizeSlider.value);
+                    currentConfig.isDark = pageBody.classList.contains('dark-theme');
+                    saveConfig();
+                    closeModal(configCardOverlay);
+                });
+            }
+
+
+            // --- Lógica de Pesquisa ---
+            if (searchInput) {
+                searchInput.addEventListener('keyup', (e) => {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+
+                    const items = giftList.querySelectorAll('.gift-item');
+                    items.forEach(item => {
+                        const titleElement = item.querySelector('.gift-title');
+                        const titleText = titleElement ? titleElement.textContent.toLowerCase() : '';
+                        
+                        if (titleText.includes(searchTerm)) {
+                            item.classList.remove('hidden');
+                        } else {
+                            item.classList.add('hidden');
+                        }
+                    });
+                });
+            }
+
+            // --- Lógica do Modal de Reserva ---
+            if (giftList) {
+                giftList.addEventListener('click', (event) => {
+                    const button = event.target;
+                    const item = button.closest('.gift-item');
+
+                    if (!item) return;
+
+                    const isReserved = item.dataset.reserved === 'true';
+
+                    if (button.classList.contains('reserve-btn-list') && !isReserved) {
+                        currentGiftItem = item; 
+                        cardGiftTitle.textContent = item.querySelector('.gift-title').textContent;
+                        
+                        reservationForm.reset(); 
+                        openModal(reservationCardOverlay);
+
+                    }
+                });
+            }
+
+            if (cardBackButton) {
+                cardBackButton.addEventListener('click', () => closeModal(reservationCardOverlay));
+            }
+            
+            if (reservationForm) {
+                reservationForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
+                    const fullName = fullNameInput.value.trim();
+                    const contactNumber = contactNumberInput.value.trim();
+
+                    if (!fullName || !contactNumber) {
+                        alert('Por favor, preencha todos os campos obrigatórios.');
+                        return;
+                    }
+
+                    if (currentGiftItem) {
+                        const itemId = currentGiftItem.dataset.id;
+                        const giftName = currentGiftItem.querySelector('.gift-title').textContent;
+                        
+                        currentGiftItem.dataset.reserved = 'true';
+                        reservedItems[itemId] = { 
+                            reserved: true,
+                            name: fullName, 
+                            contact: contactNumber,
+                            date: new Date().toISOString()
+                        };
+                        saveReservations(); 
+                        
+                        updateItemAppearance(currentGiftItem); 
+
+                        alert(`Parabéns, ${fullName}! Você reservou o presente: ${giftName}.`);
+                        
+                        closeModal(reservationCardOverlay); 
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
